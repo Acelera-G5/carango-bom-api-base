@@ -2,6 +2,7 @@ package br.com.caelum.carangobom.infra.jpa.repository;
 
 import br.com.caelum.carangobom.domain.entity.Vehicle;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
+import br.com.caelum.carangobom.domain.entity.form.SearchVehicleForm;
 import br.com.caelum.carangobom.domain.repository.VehicleRepository;
 import br.com.caelum.carangobom.infra.jpa.entity.VehicleJpa;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,7 @@ public class VehicleRepositoryJpa implements VehicleRepository {
     }
 
     @Override
-    public Page<Vehicle> getAll(Pageable pageable) {
+    public Page<Vehicle> getAll(Pageable pageable, SearchVehicleForm searchVehicleForm) {
         List<Vehicle> vehicleList;
         if(pageable.isPaged()){
             vehicleList = this.getVehiclePage(pageable);

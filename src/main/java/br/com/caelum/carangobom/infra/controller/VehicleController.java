@@ -52,7 +52,7 @@ public class VehicleController {
 
     @GetMapping
     public Page<VehicleResponse> getAllVehicles(Pageable pagination){
-        return this.vehicleService.listVehicle(pagination).map(VehicleResponse::new);
+        return this.vehicleService.listVehicle(pagination, null).map(VehicleResponse::new);
     }
 
     @GetMapping(path = "/{id}")

@@ -2,6 +2,7 @@ package br.com.caelum.carangobom.domain.repository;
 
 import br.com.caelum.carangobom.domain.entity.Vehicle;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
+import br.com.caelum.carangobom.domain.entity.form.SearchVehicleForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,17 @@ import java.util.stream.Collectors;
 public class VehicleRepositoryMock implements VehicleRepository {
 
     private List<Vehicle> vehicleList = new ArrayList<Vehicle>();
+
+    private List<Vehicle> filterVehiclesByMarcaId(List<Vehicle> vehicles, Long marcaId){
+        return vehicles.stream().filter(vehicle -> vehicle.getMarca().getId().equals(marcaId)).collect(Collectors.toList());
+    }
+    private List<Vehicle> filterVehicles(List<Vehicle> vehicles, SearchVehicleForm searchVehicleForm){
+        List<Vehicle> filteredVehicles = vehicles;
+        if(searchVehicleForm.getMarcaId() != null){
+            filteredVehicles = this.filterVehiclesByMarcaId(filteredVehicles, searchVehicleForm.getMarcaId());
+        }
+        return filteredVehicles;
+    }
 
     @Override
     public Vehicle save(Vehicle vehicle) {
@@ -31,23 +43,25 @@ public class VehicleRepositoryMock implements VehicleRepository {
     }
 
     @Override
-    public Page<Vehicle> getAll(Pageable pageable) {
+    public Page<Vehicle> getAll(Pageable pageable, SearchVehicleForm searchVehicleForm) {
+        List<Vehicle> vehicles;
         if(pageable.isPaged()){
-            return new PageImpl(
-                    this.vehicleList.subList(
-                            (int)pageable.getOffset(),
-                            (int)(pageable.getOffset()+pageable.getPageSize())
-                    ),
-                    pageable,
-                    this.vehicleList.size()
+            vehicles = this.vehicleList.subList(
+                    (int)pageable.getOffset(),
+                    (int)(pageable.getOffset()+pageable.getPageSize())
             );
         }else{
-            return new PageImpl(
-                    this.vehicleList,
-                    pageable,
-                    this.vehicleList.size()
-            );
+            vehicles = this.vehicleList;
         }
+        if(searchVehicleForm != null){
+            vehicles = this.filterVehicles(vehicles, searchVehicleForm);
+        }
+        return new PageImpl(
+                vehicles,
+                pageable,
+                vehicles.size()
+        );
+
     }
 
     @Override

@@ -131,7 +131,7 @@ class VehicleRepositoryJpaTest {
             createVehicle(new VehicleJpa(null, "Audi E", 2014, 50000.0, marcaJpa)),
             createVehicle(new VehicleJpa(null, "Audi F", 2016, 60000.0, marcaJpa))
         );
-        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged());
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),null);
         assertEquals(6, vehiclePage.getTotalElements());
         assertEquals(1, vehiclePage.getTotalPages());
         assertEquals(6, vehiclePage.getContent().size());
@@ -157,7 +157,7 @@ class VehicleRepositoryJpaTest {
                 createVehicle(new VehicleJpa(null, "Audi F", 2016, 60000.0, marcaJpa))
         );
 
-        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(new PageableDummy(0,3,null));
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(new PageableDummy(0,3,null),null);
         assertEquals(6, vehiclePage.getTotalElements());
         assertEquals(2, vehiclePage.getTotalPages());
         assertEquals(3, vehiclePage.toList().size());

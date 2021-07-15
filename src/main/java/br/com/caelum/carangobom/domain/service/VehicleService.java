@@ -3,6 +3,7 @@ package br.com.caelum.carangobom.domain.service;
 import br.com.caelum.carangobom.domain.entity.Marca;
 import br.com.caelum.carangobom.domain.entity.Vehicle;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
+import br.com.caelum.carangobom.domain.entity.form.SearchVehicleForm;
 import br.com.caelum.carangobom.domain.entity.form.VehicleForm;
 import br.com.caelum.carangobom.domain.repository.MarcaRepository;
 import br.com.caelum.carangobom.domain.repository.VehicleRepository;
@@ -52,8 +53,8 @@ public class VehicleService {
         return this.vehicleRepository.save(savedVehicle);
     }
 
-    public Page<Vehicle> listVehicle(Pageable pageable) {
-        return this.vehicleRepository.getAll(pageable);
+    public Page<Vehicle> listVehicle(Pageable pageable, SearchVehicleForm searchVehicleForm) {
+        return this.vehicleRepository.getAll(pageable, searchVehicleForm);
     }
 
     public Vehicle getVehicleById(Long id) throws NotFoundException {
