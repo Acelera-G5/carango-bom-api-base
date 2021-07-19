@@ -15,7 +15,11 @@ public class SearchVehicleRequest {
 
     String model;
 
+    Double priceMin;
+
+    Double priceMax;
+
     public SearchVehicleForm toSearchVehicleForm(){
-        return new SearchVehicleForm(marcaId,year, model,null,null);
+        return new SearchVehicleForm(marcaId,year, model,priceMin,priceMax);
     }
 }
