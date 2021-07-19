@@ -13,7 +13,9 @@ public class SearchVehicleRequest {
     @Positive
     Integer year;
 
+    String model;
+
     public SearchVehicleForm toSearchVehicleForm(){
-        return new SearchVehicleForm(marcaId,year, null);
+        return new SearchVehicleForm(marcaId,year, model);
     }
 }
