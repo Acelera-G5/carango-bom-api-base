@@ -166,7 +166,7 @@ class VehicleServiceTest {
         );
         vehicles.forEach((vehicleForm)->this.vehicleRepository.save(vehicleForm));
         VehicleService vehicleService = setup();
-        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(marca2.getId(),null);
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(marca2.getId(),null, null);
         Page<Vehicle> vehicleList = vehicleService.listVehicle(Pageable.unpaged(),searchVehicleForm);
         assertEquals(3,vehicleList.getTotalElements());
         assertEquals(3,vehicleList.getContent().size());
@@ -187,12 +187,34 @@ class VehicleServiceTest {
         );
         vehicles.forEach((vehicleForm)->this.vehicleRepository.save(vehicleForm));
         VehicleService vehicleService = setup();
-        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, 2020);
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, 2020,null);
         Page<Vehicle> vehicleList = vehicleService.listVehicle(Pageable.unpaged(),searchVehicleForm);
         assertEquals(3,vehicleList.getTotalElements());
         assertEquals(3,vehicleList.getContent().size());
         assertEquals(1, vehicleList.getTotalPages());
         assertEquals(vehicles.subList(3,6),vehicleList.toList());
+    }
+
+    @Test
+    void shouldReturnAPaginatedListWithTheVehiclesFilteredByModel(){
+        Marca marca1 = createMarca(new MarcaDummy(1L, "Audi"));
+        String model = "Audi";
+        List<VehicleForm> vehicles = Arrays.asList(
+                new VehicleForm(null,"Audi A",100000.0,2010, marca1, marca1.getId()),
+                new VehicleForm(null,"Audi B",100000.0,2010, marca1, marca1.getId()),
+                new VehicleForm(null,"Audi C",100000.0,2010, marca1, marca1.getId()),
+                new VehicleForm(null,"Ford D",100000.0,2020, marca1, marca1.getId()),
+                new VehicleForm(null,"Ford E",200000.0,2020, marca1, marca1.getId()),
+                new VehicleForm(null,"Ford F",300000.0,2020, marca1, marca1.getId())
+        );
+        vehicles.forEach((vehicleForm)->this.vehicleRepository.save(vehicleForm));
+        VehicleService vehicleService = setup();
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, null, model);
+        Page<Vehicle> vehicleList = vehicleService.listVehicle(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(3,vehicleList.getTotalElements());
+        assertEquals(3,vehicleList.getContent().size());
+        assertEquals(1, vehicleList.getTotalPages());
+        assertEquals(vehicles.subList(0,3),vehicleList.toList());
     }
 
     @Test

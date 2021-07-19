@@ -158,7 +158,7 @@ class VehicleRepositoryJpaTest {
                 createVehicle(new VehicleJpa(null, "Ford E", 2014, 50000.0, marcaJpa2)),
                 createVehicle(new VehicleJpa(null, "Ford F", 2016, 60000.0, marcaJpa2))
         );
-        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(marcaJpa2.getId(),null);
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(marcaJpa2.getId(),null,null);
         Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
         assertEquals(3, vehiclePage.getTotalElements());
         assertEquals(1, vehiclePage.getTotalPages());
@@ -186,7 +186,7 @@ class VehicleRepositoryJpaTest {
                 createVehicle(new VehicleJpa(null, "Ford E", 2020, 50000.0, marcaJpa1)),
                 createVehicle(new VehicleJpa(null, "Ford F", 2020, 60000.0, marcaJpa1))
         );
-        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null,2020);
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null,2020,null);
         Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
         assertEquals(3, vehiclePage.getTotalElements());
         assertEquals(1, vehiclePage.getTotalPages());

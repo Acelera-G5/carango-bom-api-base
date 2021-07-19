@@ -8,4 +8,5 @@ import lombok.Data;
 public class SearchVehicleForm {
     private Long marcaId;
     private Integer year;
+    private String model;
 }

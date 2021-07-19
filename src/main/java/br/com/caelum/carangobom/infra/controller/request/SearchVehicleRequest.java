@@ -14,6 +14,6 @@ public class SearchVehicleRequest {
     Integer year;
 
     public SearchVehicleForm toSearchVehicleForm(){
-        return new SearchVehicleForm(marcaId,year);
+        return new SearchVehicleForm(marcaId,year, null);
     }
 }
