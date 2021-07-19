@@ -72,6 +72,21 @@ public class VehicleRepositoryJpa implements VehicleRepository {
         criteriaQuery.where(criteriaBuilder.like(root.get("model"),"%"+model+"%"));
     }
 
+    private void filterByPrice(Root<VehicleJpa> root, CriteriaQuery criteriaQuery, Double priceMin, Double priceMax) {
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+
+        if(priceMax!=null && priceMin !=null){
+            criteriaQuery.where(criteriaBuilder.between(root.get("price"),priceMin,priceMax));
+        }else{
+            if(priceMin!=null){
+                criteriaQuery.where(criteriaBuilder.greaterThanOrEqualTo(root.get("price"),priceMin));
+            }
+            if(priceMax!=null){
+                criteriaQuery.where(criteriaBuilder.lessThanOrEqualTo(root.get("price"),priceMax));
+            }
+        }
+    }
+
     private void createFilterQuery(CriteriaQuery criteriaQuery, Root<VehicleJpa> root, SearchVehicleForm searchVehicleForm){
         if(searchVehicleForm == null){
             return;
@@ -85,6 +100,10 @@ public class VehicleRepositoryJpa implements VehicleRepository {
 
         if(searchVehicleForm.getModel() != null){
             this.filterByModel(root, criteriaQuery, searchVehicleForm.getModel());
+        }
+
+        if (searchVehicleForm.getPriceMin() != null || searchVehicleForm.getPriceMax() != null) {
+            this.filterByPrice(root, criteriaQuery, searchVehicleForm.getPriceMin(), searchVehicleForm.getPriceMax());
         }
     }
 
