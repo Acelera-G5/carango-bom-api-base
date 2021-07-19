@@ -67,6 +67,11 @@ public class VehicleRepositoryJpa implements VehicleRepository {
         criteriaQuery.where(criteriaBuilder.equal(root.get("year"), year));
     }
 
+    private void filterByModel(Root<VehicleJpa> root, CriteriaQuery criteriaQuery, String model) {
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+        criteriaQuery.where(criteriaBuilder.like(root.get("model"),"%"+model+"%"));
+    }
+
     private void createFilterQuery(CriteriaQuery criteriaQuery, Root<VehicleJpa> root, SearchVehicleForm searchVehicleForm){
         if(searchVehicleForm == null){
             return;
@@ -76,6 +81,10 @@ public class VehicleRepositoryJpa implements VehicleRepository {
         }
         if(searchVehicleForm.getYear() != null){
             this.filterByYear(root, criteriaQuery, searchVehicleForm.getYear());
+        }
+
+        if(searchVehicleForm.getModel() != null){
+            this.filterByModel(root, criteriaQuery, searchVehicleForm.getModel());
         }
     }
 

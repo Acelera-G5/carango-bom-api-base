@@ -203,6 +203,35 @@ class VehicleRepositoryJpaTest {
     }
 
     @Test
+    void shouldReturnVehiclesFilteredByModel(){
+        VehicleRepositoryJpa vehicleRepositoryJpa = setup();
+        String model = "Audi";
+        MarcaJpa marcaJpa1 = createMarca(new MarcaJpa(null,"Audi"));
+        List<Vehicle> vehicles = Arrays.asList(
+                createVehicle(new VehicleJpa(null, "Audi A", 2010, 10000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi B", 2011, 20000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi C", 2012, 30000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford D", 2020, 40000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford E", 2020, 50000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford F", 2020, 60000.0, marcaJpa1))
+        );
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null,null,model);
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(3, vehiclePage.getTotalElements());
+        assertEquals(1, vehiclePage.getTotalPages());
+        assertEquals(3, vehiclePage.getContent().size());
+        List<Vehicle> expectedFilteredVehicles = vehicles.subList(0,3);
+        List<Vehicle> actualVehicles = vehiclePage.getContent();
+        for (int i = 0; i < vehiclePage.getSize(); i++) {
+            assertEquals(expectedFilteredVehicles.get(i).getId(), actualVehicles.get(i).getId());
+            assertEquals(expectedFilteredVehicles.get(i).getModel(), actualVehicles.get(i).getModel());
+            assertEquals(expectedFilteredVehicles.get(i).getMarca().getId(), actualVehicles.get(i).getMarca().getId());
+            assertEquals(expectedFilteredVehicles.get(i).getYear(), actualVehicles.get(i).getYear());
+            assertEquals(expectedFilteredVehicles.get(i).getPrice(), actualVehicles.get(i).getPrice());
+        }
+    }
+
+    @Test
     void shouldReturnAllVehiclesPaginated(){
         VehicleRepositoryJpa vehicleRepositoryJpa = setup();
         MarcaJpa marcaJpa = createMarca(new MarcaJpa(null,"Audi"));
