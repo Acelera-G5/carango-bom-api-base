@@ -18,7 +18,6 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,37 +56,37 @@ public class VehicleRepositoryJpa implements VehicleRepository {
         return query.getResultList();
     }
 
-    private void filterByMarcaId(Root<VehicleJpa> root, CriteriaQuery<VehicleJpa> criteriaQuery, Long marcaId){
+    private void filterByMarcaId(Root<VehicleJpa> root, CriteriaQuery<?> criteriaQuery, Long marcaId){
         CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
         criteriaQuery.where(criteriaBuilder.equal(root.join("marca").get("id"), marcaId));
     }
 
-    private void filterByYear(Root<VehicleJpa> root, CriteriaQuery criteriaQuery, Integer year) {
+    private void filterByYear(Root<VehicleJpa> root, CriteriaQuery<?> criteriaQuery, Integer year) {
         CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
         criteriaQuery.where(criteriaBuilder.equal(root.get("year"), year));
     }
 
-    private void filterByModel(Root<VehicleJpa> root, CriteriaQuery criteriaQuery, String model) {
+    private void filterByModel(Root<VehicleJpa> root, CriteriaQuery<?> criteriaQuery, String model) {
         CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
         criteriaQuery.where(criteriaBuilder.like(root.get("model"),"%"+model+"%"));
     }
 
-    private void filterByPrice(Root<VehicleJpa> root, CriteriaQuery criteriaQuery, Double priceMin, Double priceMax) {
+    private void filterByPrice(Root<VehicleJpa> root, CriteriaQuery<?> criteriaQuery, Double priceMin, Double priceMax) {
         CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
-
+        final String column = "price";
         if(priceMax!=null && priceMin !=null){
-            criteriaQuery.where(criteriaBuilder.between(root.get("price"),priceMin,priceMax));
+            criteriaQuery.where(criteriaBuilder.between(root.get(column),priceMin,priceMax));
         }else{
             if(priceMin!=null){
-                criteriaQuery.where(criteriaBuilder.greaterThanOrEqualTo(root.get("price"),priceMin));
+                criteriaQuery.where(criteriaBuilder.greaterThanOrEqualTo(root.get(column),priceMin));
             }
             if(priceMax!=null){
-                criteriaQuery.where(criteriaBuilder.lessThanOrEqualTo(root.get("price"),priceMax));
+                criteriaQuery.where(criteriaBuilder.lessThanOrEqualTo(root.get(column),priceMax));
             }
         }
     }
 
-    private void createFilterQuery(CriteriaQuery criteriaQuery, Root<VehicleJpa> root, SearchVehicleForm searchVehicleForm){
+    private void createFilterQuery(CriteriaQuery<?> criteriaQuery, Root<VehicleJpa> root, SearchVehicleForm searchVehicleForm){
         if(searchVehicleForm == null){
             return;
         }
