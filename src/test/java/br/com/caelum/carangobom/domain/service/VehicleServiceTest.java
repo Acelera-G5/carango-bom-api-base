@@ -3,7 +3,6 @@ package br.com.caelum.carangobom.domain.service;
 import br.com.caelum.carangobom.domain.entity.Marca;
 import br.com.caelum.carangobom.domain.entity.MarcaDummy;
 import br.com.caelum.carangobom.domain.entity.Vehicle;
-import br.com.caelum.carangobom.domain.entity.VehicleDummy;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
 import br.com.caelum.carangobom.domain.entity.form.PageableDummy;
 import br.com.caelum.carangobom.domain.entity.form.SearchVehicleForm;

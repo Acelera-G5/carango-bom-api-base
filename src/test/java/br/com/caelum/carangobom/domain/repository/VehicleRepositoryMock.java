@@ -44,22 +44,22 @@ public class VehicleRepositoryMock implements VehicleRepository {
 
     @Override
     public Page<Vehicle> getAll(Pageable pageable, SearchVehicleForm searchVehicleForm) {
-        List<Vehicle> vehicles;
+        List<Vehicle> vehicles = new ArrayList<>(this.vehicleList);
+        if(searchVehicleForm != null){
+            vehicles = this.filterVehicles(vehicles, searchVehicleForm);
+        }
+        int vehiclesCount = vehicles.size();
         if(pageable.isPaged()){
             vehicles = this.vehicleList.subList(
                     (int)pageable.getOffset(),
                     (int)(pageable.getOffset()+pageable.getPageSize())
             );
-        }else{
-            vehicles = this.vehicleList;
         }
-        if(searchVehicleForm != null){
-            vehicles = this.filterVehicles(vehicles, searchVehicleForm);
-        }
+
         return new PageImpl(
                 vehicles,
                 pageable,
-                vehicles.size()
+                vehiclesCount
         );
 
     }
