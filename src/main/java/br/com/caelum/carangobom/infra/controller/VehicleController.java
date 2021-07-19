@@ -2,8 +2,10 @@ package br.com.caelum.carangobom.infra.controller;
 
 import br.com.caelum.carangobom.domain.entity.Vehicle;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
+import br.com.caelum.carangobom.domain.entity.form.SearchVehicleForm;
 import br.com.caelum.carangobom.domain.service.VehicleService;
 import br.com.caelum.carangobom.infra.controller.request.CreateVehicleRequest;
+import br.com.caelum.carangobom.infra.controller.request.SearchVehicleRequest;
 import br.com.caelum.carangobom.infra.controller.response.VehicleResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -51,8 +53,9 @@ public class VehicleController {
     }
 
     @GetMapping
-    public Page<VehicleResponse> getAllVehicles(Pageable pagination){
-        return this.vehicleService.listVehicle(pagination, null).map(VehicleResponse::new);
+    public Page<VehicleResponse> getAllVehicles(Pageable pagination, SearchVehicleRequest searchVehicleRequest){
+        SearchVehicleForm searchVehicleForm = searchVehicleRequest.toSearchVehicleForm();
+        return this.vehicleService.listVehicle(pagination, searchVehicleForm).map(VehicleResponse::new);
     }
 
     @GetMapping(path = "/{id}")
