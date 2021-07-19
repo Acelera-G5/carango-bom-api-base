@@ -27,8 +27,16 @@ public class VehicleRepositoryMock implements VehicleRepository {
         return filteredVehicles.stream().filter(vehicle -> vehicle.getModel().contains(modelLike)).collect(Collectors.toList());
     }
 
-    private List<Vehicle> filterVehiclesByPrice(List<Vehicle> filteredVehicles, Double priceMin) {
-        return filteredVehicles.stream().filter(vehicle -> vehicle.getPrice()>=priceMin).collect(Collectors.toList());
+    private List<Vehicle> filterVehiclesByPrice(List<Vehicle> filteredVehicles, Double priceMin, Double priceMax) {
+        return filteredVehicles.stream().filter(vehicle -> {
+            if(priceMin!=null){
+                return vehicle.getPrice() >= priceMin;
+            }
+            if(priceMax!=null){
+                return vehicle.getPrice() <= priceMax;
+            }
+            return false;
+        }).collect(Collectors.toList());
     }
 
     private List<Vehicle> filterVehicles(List<Vehicle> vehicles, SearchVehicleForm searchVehicleForm){
@@ -42,8 +50,8 @@ public class VehicleRepositoryMock implements VehicleRepository {
         if(searchVehicleForm.getModel() != null){
             filteredVehicles = this.filterVehiclesByModel(filteredVehicles, searchVehicleForm.getModel());
         }
-        if(searchVehicleForm.getPriceMin() != null){
-            filteredVehicles = this.filterVehiclesByPrice(filteredVehicles, searchVehicleForm.getPriceMin());
+        if(searchVehicleForm.getPriceMin() != null || searchVehicleForm.getPriceMax()!=null){
+            filteredVehicles = this.filterVehiclesByPrice(filteredVehicles, searchVehicleForm.getPriceMin(), searchVehicleForm.getPriceMax());
         }
         return filteredVehicles;
     }

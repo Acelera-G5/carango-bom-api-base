@@ -166,7 +166,7 @@ class VehicleServiceTest {
         );
         vehicles.forEach((vehicleForm)->this.vehicleRepository.save(vehicleForm));
         VehicleService vehicleService = setup();
-        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(marca2.getId(),null, null, null);
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(marca2.getId(),null, null, null,null);
         Page<Vehicle> vehicleList = vehicleService.listVehicle(Pageable.unpaged(),searchVehicleForm);
         assertEquals(3,vehicleList.getTotalElements());
         assertEquals(3,vehicleList.getContent().size());
@@ -187,7 +187,7 @@ class VehicleServiceTest {
         );
         vehicles.forEach((vehicleForm)->this.vehicleRepository.save(vehicleForm));
         VehicleService vehicleService = setup();
-        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, 2020,null, null);
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, 2020,null, null, null);
         Page<Vehicle> vehicleList = vehicleService.listVehicle(Pageable.unpaged(),searchVehicleForm);
         assertEquals(3,vehicleList.getTotalElements());
         assertEquals(3,vehicleList.getContent().size());
@@ -209,7 +209,7 @@ class VehicleServiceTest {
         );
         vehicles.forEach((vehicleForm)->this.vehicleRepository.save(vehicleForm));
         VehicleService vehicleService = setup();
-        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, null, model, null);
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, null, model, null, null);
         Page<Vehicle> vehicleList = vehicleService.listVehicle(Pageable.unpaged(),searchVehicleForm);
         assertEquals(3,vehicleList.getTotalElements());
         assertEquals(3,vehicleList.getContent().size());
@@ -218,7 +218,7 @@ class VehicleServiceTest {
     }
 
     @Test
-    void souldReturnAPaginatedListWithTheVehiclesFilteredByPriceGreatherThanOrEqual(){
+    void souldReturnAPaginatedListWithTheVehiclesFilteredByPriceGreaterThanOrEqual(){
         double priceMin = 200000.0;
         Marca marca1 = createMarca(new MarcaDummy(1L, "Audi"));
         List<VehicleForm> vehicles = Arrays.asList(
@@ -231,12 +231,34 @@ class VehicleServiceTest {
         );
         vehicles.forEach((vehicleForm)->this.vehicleRepository.save(vehicleForm));
         VehicleService vehicleService = setup();
-        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, null, null, priceMin);
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, null, null, priceMin, null);
         Page<Vehicle> vehicleList = vehicleService.listVehicle(Pageable.unpaged(),searchVehicleForm);
         assertEquals(2,vehicleList.getTotalElements());
         assertEquals(2,vehicleList.getContent().size());
         assertEquals(1, vehicleList.getTotalPages());
         assertEquals(vehicles.subList(4,6),vehicleList.toList());
+    }
+
+    @Test
+    void souldReturnAPaginatedListWithTheVehiclesFilteredByPriceLessThanOrEqual(){
+        double priceMax = 190000.0;
+        Marca marca1 = createMarca(new MarcaDummy(1L, "Audi"));
+        List<VehicleForm> vehicles = Arrays.asList(
+                new VehicleForm(null,"Audi A",100000.0,2010, marca1, marca1.getId()),
+                new VehicleForm(null,"Audi B",100000.0,2010, marca1, marca1.getId()),
+                new VehicleForm(null,"Audi C",100000.0,2010, marca1, marca1.getId()),
+                new VehicleForm(null,"Ford D",100000.0,2020, marca1, marca1.getId()),
+                new VehicleForm(null,"Ford E",200000.0,2020, marca1, marca1.getId()),
+                new VehicleForm(null,"Ford F",300000.0,2020, marca1, marca1.getId())
+        );
+        vehicles.forEach((vehicleForm)->this.vehicleRepository.save(vehicleForm));
+        VehicleService vehicleService = setup();
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, null, null, null, priceMax);
+        Page<Vehicle> vehicleList = vehicleService.listVehicle(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(4,vehicleList.getTotalElements());
+        assertEquals(4,vehicleList.getContent().size());
+        assertEquals(1, vehicleList.getTotalPages());
+        assertEquals(vehicles.subList(0,4),vehicleList.toList());
     }
 
     @Test

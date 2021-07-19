@@ -10,4 +10,5 @@ public class SearchVehicleForm {
     private Integer year;
     private String model;
     private Double priceMin;
+    private Double priceMax;
 }
