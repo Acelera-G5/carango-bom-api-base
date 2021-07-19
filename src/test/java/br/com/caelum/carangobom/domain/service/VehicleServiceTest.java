@@ -262,6 +262,29 @@ class VehicleServiceTest {
     }
 
     @Test
+    void souldReturnAPaginatedListWithTheVehiclesFilteredByPriceBetween(){
+        double priceMin = 120000.0;
+        double priceMax = 200000.0;
+        Marca marca1 = createMarca(new MarcaDummy(1L, "Audi"));
+        List<VehicleForm> vehicles = Arrays.asList(
+                new VehicleForm(null,"Audi A",100000.0,2010, marca1, marca1.getId()),
+                new VehicleForm(null,"Audi B",100000.0,2010, marca1, marca1.getId()),
+                new VehicleForm(null,"Audi C",100000.0,2010, marca1, marca1.getId()),
+                new VehicleForm(null,"Ford D",100000.0,2020, marca1, marca1.getId()),
+                new VehicleForm(null,"Ford E",200000.0,2020, marca1, marca1.getId()),
+                new VehicleForm(null,"Ford F",300000.0,2020, marca1, marca1.getId())
+        );
+        vehicles.forEach((vehicleForm)->this.vehicleRepository.save(vehicleForm));
+        VehicleService vehicleService = setup();
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null, null, null, priceMin, priceMax);
+        Page<Vehicle> vehicleList = vehicleService.listVehicle(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(1,vehicleList.getTotalElements());
+        assertEquals(1,vehicleList.getContent().size());
+        assertEquals(1, vehicleList.getTotalPages());
+        assertEquals(vehicles.subList(4,5),vehicleList.toList());
+    }
+
+    @Test
     void shouldGetAVehicleById() throws NotFoundException {
         Marca marca = createMarca(new MarcaDummy(null, "Audi"));
         Vehicle vehicle = this.vehicleRepository.save(

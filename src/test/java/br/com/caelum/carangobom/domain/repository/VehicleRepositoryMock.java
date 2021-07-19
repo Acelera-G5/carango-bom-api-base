@@ -29,6 +29,9 @@ public class VehicleRepositoryMock implements VehicleRepository {
 
     private List<Vehicle> filterVehiclesByPrice(List<Vehicle> filteredVehicles, Double priceMin, Double priceMax) {
         return filteredVehicles.stream().filter(vehicle -> {
+            if(priceMax != null && priceMin != null){
+                return vehicle.getPrice() >= priceMin && vehicle.getPrice() <= priceMax;
+            }
             if(priceMin!=null){
                 return vehicle.getPrice() >= priceMin;
             }
