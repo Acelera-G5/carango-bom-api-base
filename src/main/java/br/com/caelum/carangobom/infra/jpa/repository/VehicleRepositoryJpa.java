@@ -15,6 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,15 +37,38 @@ public class VehicleRepositoryJpa implements VehicleRepository {
         return new VehicleJpa(vehicle);
     }
 
-    private List<Vehicle> getAllVehicles(){
-        return entityManager.createQuery("Select v from vehicle v").getResultList();
+    private Long countVehicles(SearchVehicleForm searchVehicleForm){
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaQueryLong = criteriaBuilder.createQuery(Long.class);
+        Root<VehicleJpa> vehicleJpaRoot = criteriaQueryLong.from(VehicleJpa.class);
+        this.createFilterQuery(criteriaQueryLong, vehicleJpaRoot, searchVehicleForm);
+        criteriaQueryLong.select(criteriaBuilder.count(vehicleJpaRoot));
+        Query query = this.entityManager.createQuery(criteriaQueryLong);
+        return (Long) query.getSingleResult();
     }
 
-    private List<Vehicle> getVehiclePage(Pageable pageable){
-        Query query = entityManager.createQuery("From vehicle",VehicleJpa.class);
+    private List<Vehicle> getAllVehicles(Query query){
+        return query.getResultList();
+    }
+
+    private List<Vehicle> getVehiclePage(Query query, Pageable pageable){
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
         return query.getResultList();
+    }
+
+    private void filterByMarcaId(Root<VehicleJpa> root, CriteriaQuery<VehicleJpa> criteriaQuery, Long marcaId){
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+        criteriaQuery.where(criteriaBuilder.equal(root.join("marca").get("id"), marcaId));
+    }
+
+    private void createFilterQuery(CriteriaQuery criteriaQuery, Root<VehicleJpa> root, SearchVehicleForm searchVehicleForm){
+        if(searchVehicleForm == null){
+            return;
+        }
+        if(searchVehicleForm.getMarcaId() != null){
+            this.filterByMarcaId(root, criteriaQuery, searchVehicleForm.getMarcaId());
+        }
     }
 
     @Override
@@ -63,18 +90,24 @@ public class VehicleRepositoryJpa implements VehicleRepository {
 
     @Override
     public Page<Vehicle> getAll(Pageable pageable, SearchVehicleForm searchVehicleForm) {
+        CriteriaQuery<VehicleJpa> vehicleJpaCriteriaQuery = this.entityManager.getCriteriaBuilder().createQuery(VehicleJpa.class);
+        Root<VehicleJpa> vehicleJpaRoot = vehicleJpaCriteriaQuery.from(VehicleJpa.class);
+        this.createFilterQuery(vehicleJpaCriteriaQuery, vehicleJpaRoot, searchVehicleForm);
+
+        Query query = this.entityManager.createQuery(vehicleJpaCriteriaQuery);
+
         List<Vehicle> vehicleList;
         if(pageable.isPaged()){
-            vehicleList = this.getVehiclePage(pageable);
+            vehicleList = this.getVehiclePage(query, pageable);
         }else{
-            vehicleList = this.getAllVehicles();
+            vehicleList = this.getAllVehicles(query);
         }
-        Long countResult = entityManager.createQuery("Select count(v.id) From vehicle v", Long.class).getSingleResult();
 
+        Long countVehicles = this.countVehicles(searchVehicleForm);
         return new PageImpl<>(
                 vehicleList,
                 pageable,
-                countResult
+                countVehicles
         );
     }
 

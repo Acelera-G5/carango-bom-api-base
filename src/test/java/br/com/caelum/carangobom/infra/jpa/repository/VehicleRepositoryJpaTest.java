@@ -3,6 +3,7 @@ package br.com.caelum.carangobom.infra.jpa.repository;
 import br.com.caelum.carangobom.domain.entity.Vehicle;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
 import br.com.caelum.carangobom.domain.entity.form.PageableDummy;
+import br.com.caelum.carangobom.domain.entity.form.SearchVehicleForm;
 import br.com.caelum.carangobom.infra.jpa.entity.MarcaJpa;
 import br.com.caelum.carangobom.infra.jpa.entity.VehicleJpa;
 import org.junit.jupiter.api.BeforeEach;
@@ -141,6 +142,35 @@ class VehicleRepositoryJpaTest {
             assertEquals(vehicles.get(i).getMarca().getId(), vehiclePage.getContent().get(i).getMarca().getId());
             assertEquals(vehicles.get(i).getYear(), vehiclePage.getContent().get(i).getYear());
             assertEquals(vehicles.get(i).getPrice(), vehiclePage.getContent().get(i).getPrice());
+        }
+    }
+
+    @Test
+    void shouldReturnVehiclesFilteredByMarcaId(){
+        VehicleRepositoryJpa vehicleRepositoryJpa = setup();
+        MarcaJpa marcaJpa1 = createMarca(new MarcaJpa(null,"Audi"));
+        MarcaJpa marcaJpa2 = createMarca(new MarcaJpa(null,"Ford"));
+        List<Vehicle> vehicles = Arrays.asList(
+                createVehicle(new VehicleJpa(null, "Audi A", 2010, 10000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi B", 2011, 20000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi C", 2012, 30000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford D", 2013, 40000.0, marcaJpa2)),
+                createVehicle(new VehicleJpa(null, "Ford E", 2014, 50000.0, marcaJpa2)),
+                createVehicle(new VehicleJpa(null, "Ford F", 2016, 60000.0, marcaJpa2))
+        );
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(marcaJpa2.getId());
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(3, vehiclePage.getTotalElements());
+        assertEquals(1, vehiclePage.getTotalPages());
+        assertEquals(3, vehiclePage.getContent().size());
+        List<Vehicle> expectedFilteredVehicles = vehicles.subList(3,6);
+        List<Vehicle> actualVehicles = vehiclePage.getContent();
+        for (int i = 0; i < vehiclePage.getSize(); i++) {
+            assertEquals(expectedFilteredVehicles.get(i).getId(), actualVehicles.get(i).getId());
+            assertEquals(expectedFilteredVehicles.get(i).getModel(), actualVehicles.get(i).getModel());
+            assertEquals(expectedFilteredVehicles.get(i).getMarca().getId(), actualVehicles.get(i).getMarca().getId());
+            assertEquals(expectedFilteredVehicles.get(i).getYear(), actualVehicles.get(i).getYear());
+            assertEquals(expectedFilteredVehicles.get(i).getPrice(), actualVehicles.get(i).getPrice());
         }
     }
 
