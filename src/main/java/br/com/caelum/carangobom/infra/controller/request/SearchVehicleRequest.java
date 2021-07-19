@@ -10,7 +10,10 @@ public class SearchVehicleRequest {
     @Positive
     Long marcaId;
 
+    @Positive
+    Integer year;
+
     public SearchVehicleForm toSearchVehicleForm(){
-        return new SearchVehicleForm(marcaId,null);
+        return new SearchVehicleForm(marcaId,year);
     }
 }

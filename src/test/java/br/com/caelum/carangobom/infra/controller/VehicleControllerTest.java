@@ -306,6 +306,46 @@ class VehicleControllerTest {
     }
 
     @Test
+    void shouldReturnVehiclesFilteredByYear() throws Exception {
+        MarcaJpa marcaJpa1 = this.createMarca(new MarcaJpa("Ford"));
+        List<VehicleJpa> vehicleJpaList = Arrays.asList(
+                createVehicle(new VehicleJpa(null,"Ford k",2002,15000.0,marcaJpa1)),
+                createVehicle(new VehicleJpa(null,"Ford L",2003,25000.0,marcaJpa1)),
+                createVehicle(new VehicleJpa(null,"Audi K",2020,35000.0,marcaJpa1)),
+                createVehicle(new VehicleJpa(null,"Audi L",2020,45000.0,marcaJpa1))
+        );
+
+        ResultActions resultActions = mockMvc
+                .perform(
+                        MockMvcRequestBuilders
+                                .get("/vehicle/")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .queryParam("page","0")
+                                .queryParam("size","2")
+                                .queryParam("year","2020")
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.empty").value(false))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.totalPages").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.numberOfElements").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.last").value(true))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.first").value(true));
+        List<VehicleJpa> subList = vehicleJpaList.subList(2,4);
+        for (int i = 0; i < 2; i++) {
+            resultActions
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.content["+i+"].marca.id").value(subList.get(i).getMarca().getId()))
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.content["+i+"].marca.nome").value(subList.get(i).getMarca().getNome()))
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.content["+i+"].id").value(subList.get(i).getId()))
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.content["+i+"].model").value(subList.get(i).getModel()))
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.content["+i+"].price").value(subList.get(i).getPrice()))
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.content["+i+"].year").value(subList.get(i).getYear()));
+        }
+    }
+
+    @Test
     void shouldReturnAVehilceUsingId() throws Exception {
         MarcaJpa marcaJpa = this.createMarca(new MarcaJpa("Ford"));
         VehicleJpa vehicleJpa = createVehicle(new VehicleJpa(null,"Ford k",2002,15000.0,marcaJpa));
