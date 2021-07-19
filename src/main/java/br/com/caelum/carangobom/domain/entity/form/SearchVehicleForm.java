@@ -7,4 +7,5 @@ import lombok.Data;
 @Data
 public class SearchVehicleForm {
     private Long marcaId;
+    private Integer year;
 }

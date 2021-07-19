@@ -11,6 +11,6 @@ public class SearchVehicleRequest {
     Long marcaId;
 
     public SearchVehicleForm toSearchVehicleForm(){
-        return new SearchVehicleForm(marcaId);
+        return new SearchVehicleForm(marcaId,null);
     }
 }

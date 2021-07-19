@@ -19,10 +19,17 @@ public class VehicleRepositoryMock implements VehicleRepository {
     private List<Vehicle> filterVehiclesByMarcaId(List<Vehicle> vehicles, Long marcaId){
         return vehicles.stream().filter(vehicle -> vehicle.getMarca().getId().equals(marcaId)).collect(Collectors.toList());
     }
+    private List<Vehicle> filterVehiclesByYear(List<Vehicle> filteredVehicles, Integer year) {
+        return filteredVehicles.stream().filter(vehicle -> vehicle.getYear().equals(year)).collect(Collectors.toList());
+    }
+
     private List<Vehicle> filterVehicles(List<Vehicle> vehicles, SearchVehicleForm searchVehicleForm){
         List<Vehicle> filteredVehicles = vehicles;
         if(searchVehicleForm.getMarcaId() != null){
             filteredVehicles = this.filterVehiclesByMarcaId(filteredVehicles, searchVehicleForm.getMarcaId());
+        }
+        if(searchVehicleForm.getYear() != null){
+            filteredVehicles = this.filterVehiclesByYear(filteredVehicles, searchVehicleForm.getYear());
         }
         return filteredVehicles;
     }
