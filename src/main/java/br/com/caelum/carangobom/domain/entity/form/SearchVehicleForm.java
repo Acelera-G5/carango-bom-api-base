@@ -9,4 +9,5 @@ public class SearchVehicleForm {
     private Long marcaId;
     private Integer year;
     private String model;
+    private Double priceMin;
 }

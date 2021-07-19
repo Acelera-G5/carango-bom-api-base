@@ -16,6 +16,6 @@ public class SearchVehicleRequest {
     String model;
 
     public SearchVehicleForm toSearchVehicleForm(){
-        return new SearchVehicleForm(marcaId,year, model);
+        return new SearchVehicleForm(marcaId,year, model,null);
     }
 }

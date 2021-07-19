@@ -27,6 +27,10 @@ public class VehicleRepositoryMock implements VehicleRepository {
         return filteredVehicles.stream().filter(vehicle -> vehicle.getModel().contains(modelLike)).collect(Collectors.toList());
     }
 
+    private List<Vehicle> filterVehiclesByPrice(List<Vehicle> filteredVehicles, Double priceMin) {
+        return filteredVehicles.stream().filter(vehicle -> vehicle.getPrice()>=priceMin).collect(Collectors.toList());
+    }
+
     private List<Vehicle> filterVehicles(List<Vehicle> vehicles, SearchVehicleForm searchVehicleForm){
         List<Vehicle> filteredVehicles = vehicles;
         if(searchVehicleForm.getMarcaId() != null){
@@ -38,8 +42,13 @@ public class VehicleRepositoryMock implements VehicleRepository {
         if(searchVehicleForm.getModel() != null){
             filteredVehicles = this.filterVehiclesByModel(filteredVehicles, searchVehicleForm.getModel());
         }
+        if(searchVehicleForm.getPriceMin() != null){
+            filteredVehicles = this.filterVehiclesByPrice(filteredVehicles, searchVehicleForm.getPriceMin());
+        }
         return filteredVehicles;
     }
+
+
 
     @Override
     public Vehicle save(Vehicle vehicle) {
