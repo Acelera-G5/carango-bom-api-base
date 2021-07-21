@@ -33,7 +33,7 @@ public class MarcaController {
 
     @GetMapping
     @Transactional
-    @Cacheable(value = "brands")
+    @Cacheable(value = "brands", key = "#root.method")
     public List<MarcaResponse> lista() {
         return marcaService
         		.findAllByOrderByNome()
