@@ -43,7 +43,6 @@ public class MarcaController {
     }
 
     @GetMapping("/{id}")
-    @Cacheable(key = "#id", value = "brands")
     public ResponseEntity<MarcaResponse> getMarcaById(@PathVariable Long id) {
         Optional<Marca> marca = marcaService.findById(id);
         if (marca.isPresent()) {
