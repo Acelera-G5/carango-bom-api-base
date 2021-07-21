@@ -1,4 +1,4 @@
-package br.com.caelum.carangobom.infra.jpa;
+package br.com.caelum.carangobom.infra.jpa.repository;
 
 import br.com.caelum.carangobom.domain.entity.User;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles("test")
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class UserJpaTest {
+class UserRepositoryJpaTest {
 
     @Autowired
     UserRepository userRepositoryJpa;
@@ -47,7 +47,7 @@ class UserJpaTest {
     }
 
     @Test
-    void testCreateSuccess() {
+    void shouldCreateNewUser() {
         assertEquals(2, userRepositoryJpa.findAll().size());
 
         CreateUserRequest request = new CreateUserRequest();
@@ -72,7 +72,7 @@ class UserJpaTest {
     }
 
     @Test
-    void testDeleteUserSuccess() {
+    void shouldDeleteExistingUser() {
         assertDoesNotThrow(() -> {
             userRepositoryJpa.delete(userRepositoryJpa.findAll().get(0).getId());
 
@@ -85,14 +85,14 @@ class UserJpaTest {
     }
 
     @Test
-    void testDeleteUserFail() {
+    void shouldThrowNotFoundExceptionWhenAttemptToDeleteNonExistingUser() {
         assertThrows(NotFoundException.class, () -> {
             userRepositoryJpa.delete(100L);
         });
     }
 
     @Test
-    void testGetDetailedUserSuccess() {
+    void shouldReturnDetailedUsersInformation() {
         assertDoesNotThrow(() -> {
             User requestedUser = userRepositoryJpa.findAll().get(0);
             Optional<User> userResponse = userRepositoryJpa.findById(requestedUser.getId());
@@ -114,12 +114,12 @@ class UserJpaTest {
     }
 
     @Test
-    void testGetDetailedUserFail() {
+    void shouldReturnEmptyObjectWhenRequestedNonExistingUserById() {
         assertFalse(userRepositoryJpa.findById(100L).isPresent());
     }
 
     @Test
-    void testGetByUsername() {
+    void shouldReturnUserByItsUsername() {
         Optional<User> userOptional = userRepositoryJpa.findByUsername("standard");
         assertNotNull(userOptional);
         assertTrue(userOptional.isPresent());
@@ -127,7 +127,7 @@ class UserJpaTest {
     }
 
     @Test
-    void testGetByUsernameFail() {
+    void shouldReturnEmptyObjectWhenRequestedNonExistingUserByUsername() {
         Optional<User> userOptional = userRepositoryJpa.findByUsername("incorrect");
         assertNotNull(userOptional);
         assertFalse(userOptional.isPresent());

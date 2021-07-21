@@ -45,7 +45,7 @@ class UserControllerMvcTest {
 
     @Test
     @WithMockUser
-    void testBeanValidationFail() throws Exception {
+    void shouldFailBeanValidationWhenInvalidPassword() throws Exception {
         CreateUserRequest request = new CreateUserRequest();
         request.setUsername("admin");
         request.setPassword("");
@@ -56,7 +56,7 @@ class UserControllerMvcTest {
 
     @Test
     @WithMockUser
-    void testBeanValidationFail2() throws Exception {
+    void shouldFailBeanValidationWhenInvalidUsername() throws Exception {
         CreateUserRequest request = new CreateUserRequest();
         request.setUsername("");
         request.setPassword("123456");
@@ -67,7 +67,7 @@ class UserControllerMvcTest {
 
     @Test
     @WithMockUser
-    void testBeanValidationFail3() throws Exception {
+    void shouldFailBeanValidationWhenAllFieldsInvalid() throws Exception {
         CreateUserRequest request = new CreateUserRequest();
         request.setUsername("");
         request.setPassword("");
@@ -77,7 +77,7 @@ class UserControllerMvcTest {
     }
 
     @Test
-    void testUpdatePasswordSuccess() throws Exception {
+    void shouldUpdateUsersPassword() throws Exception {
         AuthenticationRequest request = new AuthenticationRequest("admin", "123456");
         String response = mockMvc.perform(
                 post("/auth").contentType(MediaType.APPLICATION_JSON)
@@ -107,7 +107,7 @@ class UserControllerMvcTest {
     }
 
     @Test
-    void testUpdatePasswordFail() throws Exception {
+    void shouldFailUpdateUsersPasswordWhenWrongOldPassword() throws Exception {
         AuthenticationRequest request = new AuthenticationRequest("admin", "123456");
         String response = mockMvc.perform(
                 post("/auth").contentType(MediaType.APPLICATION_JSON)

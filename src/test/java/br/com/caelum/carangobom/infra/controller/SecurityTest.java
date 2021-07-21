@@ -41,7 +41,7 @@ class SecurityTest {
     }
 
     @Test
-    void testUnauthorizedEndpoints() throws Exception {
+    void shouldReturnForbiddenWhenNotAuthenticated() throws Exception {
         CreateUserRequest request = new CreateUserRequest();
         request.setUsername("unauthorized");
         request.setPassword("123456");
@@ -55,12 +55,12 @@ class SecurityTest {
     }
 
     @Test
-    void testPublicEndpoints() throws Exception {
+    void shouldReturnStatusOkWhenAttemptToAccessGrantedEndpoints() throws Exception {
         mockMvc.perform(get("/users")).andExpect(status().isOk());
     }
 
     @Test
-    void testAuthenticationEndpoint() throws Exception {
+    void shouldReturnStatusOkWhenAuthenticated() throws Exception {
         AuthenticationRequest request = new AuthenticationRequest("admin", "123456");
         mockMvc.perform(
                 post("/auth").contentType(MediaType.APPLICATION_JSON)
@@ -69,7 +69,7 @@ class SecurityTest {
     }
 
     @Test
-    void testAuthenticationBadCredentials() throws Exception {
+    void shouldReturnBadRequestWhenBadCredentials() throws Exception {
         AuthenticationRequest request = new AuthenticationRequest("wrong", "123456");
         mockMvc.perform(
                 post("/auth").contentType(MediaType.APPLICATION_JSON)
@@ -78,7 +78,7 @@ class SecurityTest {
     }
 
     @Test
-    void createUserAuthenticated() throws Exception {
+    void shouldCreateAnUserWhenAuthenticated() throws Exception {
         AuthenticationRequest request = new AuthenticationRequest("admin", "123456");
         String response = mockMvc.perform(
                 post("/auth").contentType(MediaType.APPLICATION_JSON)
@@ -101,9 +101,10 @@ class SecurityTest {
     }
 
     @Test
-    void testCors() throws Exception {
-        mockMvc.perform(get("/users").header("Origin", "https://wrong.com"))
+    void shouldAcceptAllOriginsAndMethods() throws Exception {
+        mockMvc.perform(get("/users"))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(header().stringValues("Access-Control-Allow-Origin", "*"))
+                .andExpect(header().stringValues("Access-Control-Allow-Methods", "*"));
     }
 }
