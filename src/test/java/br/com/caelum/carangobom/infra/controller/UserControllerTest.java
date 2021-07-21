@@ -55,7 +55,7 @@ class UserControllerTest {
     }
 
     @Test
-    void testCreateSuccess() {
+    void shouldCreateNewUsers() {
         assertEquals(2, userController.getUsers().size());
 
         CreateUserRequest request = new CreateUserRequest();
@@ -84,7 +84,7 @@ class UserControllerTest {
     }
 
     @Test
-    void testDeleteUserSuccess() {
+    void shouldDeleteAnUser() {
         List<GetUserResponse> users = userController.getUsers();
 
         ResponseEntity<Void> response = userController.deleteUser(users.get(0).getId());
@@ -101,13 +101,13 @@ class UserControllerTest {
     }
 
     @Test
-    void testDeleteUserFail() {
+    void shouldFailWhenDeleteNonExistingUser() {
         ResponseEntity<Void> response = userController.deleteUser(100L);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
-    void testGetDetailedUserSuccess() {
+    void shouldReturnDetailedUserInfo() {
         List<GetUserResponse> users = userController.getUsers();
 
         ResponseEntity<GetDetailedUserResponse> userResponse = userController.getDetailedUser(users.get(0).getId());
@@ -128,7 +128,7 @@ class UserControllerTest {
     }
 
     @Test
-    void testGetDetailedUserFail() {
+    void shouldFailWhenRequestedNonExistingDetailedUser() {
         ResponseEntity<GetDetailedUserResponse> userResponse = userController.getDetailedUser(100L);
         assertEquals(HttpStatus.NOT_FOUND, userResponse.getStatusCode());
     }

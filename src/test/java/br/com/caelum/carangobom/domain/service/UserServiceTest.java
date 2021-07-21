@@ -31,7 +31,7 @@ class UserServiceTest {
     private final UserService userService = new UserService(userRepository, tokenService, passwordEncoder);
 
     @Test
-    void testBeanValidationFail() {
+    void shouldFailBeanValidationWhenFieldsBlankOrNull() {
         UserDummy request = new UserDummy(1L, "", "123456");
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -60,7 +60,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testBeanValidationSuccess() {
+    void shouldPassBeanValidationWhenBothFieldsFilled() {
         UserDummy request = new UserDummy(1L, "usuario", "123456");
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -71,7 +71,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testFindAllSuccess() {
+    void shouldReturnAllCreatedUsers() {
         assertEquals(0, userService.findAll().size());
 
         UserDummy request = new UserDummy(1L, "standard user", "123456");
@@ -88,7 +88,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testFindByIdSuccess() {
+    void shouldReturnDetailedUser() {
         String password = "123456";
         UserDummy request = new UserDummy(1L, "standard user", password);
         userService.create(request);
@@ -104,7 +104,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testFindByIdFail() {
+    void shouldThrowNotFoundExceptionWhenRequestedNonExistingUser() {
         UserDummy request = new UserDummy(1L, "standard user", "123456");
 
         userService.create(request);
@@ -115,7 +115,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testDeleteSuccess() {
+    void shouldSuccessfullyDeleteSpecificUser() {
         assertEquals(0, userService.findAll().size());
 
         UserDummy request = new UserDummy(1L, "standard user", "standard user");
@@ -131,7 +131,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testDeleteFail() {
+    void shouldThrowNotFoundExceptionWhenAttemptToDeleteNonExistingUser() {
         assertEquals(0, userService.findAll().size());
 
         assertThrows(NotFoundException.class, () -> userService.delete(0L));
@@ -150,7 +150,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdate() {
+    void shouldUpdateExistingUser() {
         UserDummy request = new UserDummy(1L, "standard user", "123456");
 
         userService.create(request);
@@ -166,7 +166,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdatePasswordSuccess() {
+    void shouldUpdatePasswordOfExistingUser() {
         UserDummy request = new UserDummy(1L, "standard user", "123456");
         userService.create(request);
 
@@ -182,7 +182,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdatePasswordFail() {
+    void shouldFailOnAttemptToChangeUsersPasswordWhenWrongOldPassword() {
         UserDummy request = new UserDummy(1L, "standard user", "123456");
         userService.create(request);
 
@@ -197,7 +197,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdatePasswordFail2() {
+    void shouldFailOnAttemptToChangePasswordOnNonExistingUser() {
         UsernamePasswordAuthenticationToken auth =
                 new AuthenticationRequest("standard user", "123456").parseUsernamePasswordAuthenticationToken();
 
