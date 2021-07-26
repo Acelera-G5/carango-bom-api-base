@@ -3,6 +3,7 @@ package br.com.caelum.carangobom.infra.jpa.repository;
 import br.com.caelum.carangobom.domain.entity.Vehicle;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
 import br.com.caelum.carangobom.domain.entity.form.PageableDummy;
+import br.com.caelum.carangobom.domain.entity.form.SearchVehicleForm;
 import br.com.caelum.carangobom.infra.jpa.entity.MarcaJpa;
 import br.com.caelum.carangobom.infra.jpa.entity.VehicleJpa;
 import org.junit.jupiter.api.BeforeEach;
@@ -131,7 +132,7 @@ class VehicleRepositoryJpaTest {
             createVehicle(new VehicleJpa(null, "Audi E", 2014, 50000.0, marcaJpa)),
             createVehicle(new VehicleJpa(null, "Audi F", 2016, 60000.0, marcaJpa))
         );
-        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged());
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),null);
         assertEquals(6, vehiclePage.getTotalElements());
         assertEquals(1, vehiclePage.getTotalPages());
         assertEquals(6, vehiclePage.getContent().size());
@@ -141,6 +142,176 @@ class VehicleRepositoryJpaTest {
             assertEquals(vehicles.get(i).getMarca().getId(), vehiclePage.getContent().get(i).getMarca().getId());
             assertEquals(vehicles.get(i).getYear(), vehiclePage.getContent().get(i).getYear());
             assertEquals(vehicles.get(i).getPrice(), vehiclePage.getContent().get(i).getPrice());
+        }
+    }
+
+    @Test
+    void shouldReturnVehiclesFilteredByMarcaId(){
+        VehicleRepositoryJpa vehicleRepositoryJpa = setup();
+        MarcaJpa marcaJpa1 = createMarca(new MarcaJpa(null,"Audi"));
+        MarcaJpa marcaJpa2 = createMarca(new MarcaJpa(null,"Ford"));
+        List<Vehicle> vehicles = Arrays.asList(
+                createVehicle(new VehicleJpa(null, "Audi A", 2010, 10000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi B", 2011, 20000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi C", 2012, 30000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford D", 2013, 40000.0, marcaJpa2)),
+                createVehicle(new VehicleJpa(null, "Ford E", 2014, 50000.0, marcaJpa2)),
+                createVehicle(new VehicleJpa(null, "Ford F", 2016, 60000.0, marcaJpa2))
+        );
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(marcaJpa2.getId(),null,null, null, null);
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(3, vehiclePage.getTotalElements());
+        assertEquals(1, vehiclePage.getTotalPages());
+        assertEquals(3, vehiclePage.getContent().size());
+        List<Vehicle> expectedFilteredVehicles = vehicles.subList(3,6);
+        List<Vehicle> actualVehicles = vehiclePage.getContent();
+        for (int i = 0; i < vehiclePage.getSize(); i++) {
+            assertEquals(expectedFilteredVehicles.get(i).getId(), actualVehicles.get(i).getId());
+            assertEquals(expectedFilteredVehicles.get(i).getModel(), actualVehicles.get(i).getModel());
+            assertEquals(expectedFilteredVehicles.get(i).getMarca().getId(), actualVehicles.get(i).getMarca().getId());
+            assertEquals(expectedFilteredVehicles.get(i).getYear(), actualVehicles.get(i).getYear());
+            assertEquals(expectedFilteredVehicles.get(i).getPrice(), actualVehicles.get(i).getPrice());
+        }
+    }
+
+    @Test
+    void shouldReturnVehiclesFilteredByYear(){
+        VehicleRepositoryJpa vehicleRepositoryJpa = setup();
+        MarcaJpa marcaJpa1 = createMarca(new MarcaJpa(null,"Audi"));
+        List<Vehicle> vehicles = Arrays.asList(
+                createVehicle(new VehicleJpa(null, "Audi A", 2010, 10000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi B", 2011, 20000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi C", 2012, 30000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford D", 2020, 40000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford E", 2020, 50000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford F", 2020, 60000.0, marcaJpa1))
+        );
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null,2020,null,null, null);
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(3, vehiclePage.getTotalElements());
+        assertEquals(1, vehiclePage.getTotalPages());
+        assertEquals(3, vehiclePage.getContent().size());
+        List<Vehicle> expectedFilteredVehicles = vehicles.subList(3,6);
+        List<Vehicle> actualVehicles = vehiclePage.getContent();
+        for (int i = 0; i < vehiclePage.getSize(); i++) {
+            assertEquals(expectedFilteredVehicles.get(i).getId(), actualVehicles.get(i).getId());
+            assertEquals(expectedFilteredVehicles.get(i).getModel(), actualVehicles.get(i).getModel());
+            assertEquals(expectedFilteredVehicles.get(i).getMarca().getId(), actualVehicles.get(i).getMarca().getId());
+            assertEquals(expectedFilteredVehicles.get(i).getYear(), actualVehicles.get(i).getYear());
+            assertEquals(expectedFilteredVehicles.get(i).getPrice(), actualVehicles.get(i).getPrice());
+        }
+    }
+
+    @Test
+    void shouldReturnVehiclesFilteredByModel(){
+        VehicleRepositoryJpa vehicleRepositoryJpa = setup();
+        String model = "Audi";
+        MarcaJpa marcaJpa1 = createMarca(new MarcaJpa(null,"Audi"));
+        List<Vehicle> vehicles = Arrays.asList(
+                createVehicle(new VehicleJpa(null, "Audi A", 2010, 10000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi B", 2011, 20000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi C", 2012, 30000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford D", 2020, 40000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford E", 2020, 50000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford F", 2020, 60000.0, marcaJpa1))
+        );
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null,null,model, null, null);
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(3, vehiclePage.getTotalElements());
+        assertEquals(1, vehiclePage.getTotalPages());
+        assertEquals(3, vehiclePage.getContent().size());
+        List<Vehicle> expectedFilteredVehicles = vehicles.subList(0,3);
+        List<Vehicle> actualVehicles = vehiclePage.getContent();
+        for (int i = 0; i < vehiclePage.getSize(); i++) {
+            assertEquals(expectedFilteredVehicles.get(i).getId(), actualVehicles.get(i).getId());
+            assertEquals(expectedFilteredVehicles.get(i).getModel(), actualVehicles.get(i).getModel());
+            assertEquals(expectedFilteredVehicles.get(i).getMarca().getId(), actualVehicles.get(i).getMarca().getId());
+            assertEquals(expectedFilteredVehicles.get(i).getYear(), actualVehicles.get(i).getYear());
+            assertEquals(expectedFilteredVehicles.get(i).getPrice(), actualVehicles.get(i).getPrice());
+        }
+    }
+
+    @Test
+    void shouldReturnVehiclesFilteredByPriceMin(){
+        VehicleRepositoryJpa vehicleRepositoryJpa = setup();
+        MarcaJpa marcaJpa1 = createMarca(new MarcaJpa(null,"Audi"));
+        List<Vehicle> vehicles = Arrays.asList(
+                createVehicle(new VehicleJpa(null, "Audi A", 2010, 10000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi B", 2011, 20000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi C", 2012, 30000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford D", 2020, 40000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford E", 2020, 50000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford F", 2020, 60000.0, marcaJpa1))
+        );
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null,null,null, 40000.0, null);
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(3, vehiclePage.getTotalElements());
+        assertEquals(1, vehiclePage.getTotalPages());
+        assertEquals(3, vehiclePage.getContent().size());
+        List<Vehicle> expectedFilteredVehicles = vehicles.subList(3,6);
+        List<Vehicle> actualVehicles = vehiclePage.getContent();
+        for (int i = 0; i < vehiclePage.getSize(); i++) {
+            assertEquals(expectedFilteredVehicles.get(i).getId(), actualVehicles.get(i).getId());
+            assertEquals(expectedFilteredVehicles.get(i).getModel(), actualVehicles.get(i).getModel());
+            assertEquals(expectedFilteredVehicles.get(i).getMarca().getId(), actualVehicles.get(i).getMarca().getId());
+            assertEquals(expectedFilteredVehicles.get(i).getYear(), actualVehicles.get(i).getYear());
+            assertEquals(expectedFilteredVehicles.get(i).getPrice(), actualVehicles.get(i).getPrice());
+        }
+    }
+
+    @Test
+    void shouldReturnVehiclesFilteredByPriceMax(){
+        VehicleRepositoryJpa vehicleRepositoryJpa = setup();
+        MarcaJpa marcaJpa1 = createMarca(new MarcaJpa(null,"Audi"));
+        List<Vehicle> vehicles = Arrays.asList(
+                createVehicle(new VehicleJpa(null, "Audi A", 2010, 10000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi B", 2011, 20000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi C", 2012, 30000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford D", 2020, 40000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford E", 2020, 50000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford F", 2020, 60000.0, marcaJpa1))
+        );
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null,null,null, null, 50000.0);
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(5, vehiclePage.getTotalElements());
+        assertEquals(1, vehiclePage.getTotalPages());
+        assertEquals(5, vehiclePage.getContent().size());
+        List<Vehicle> expectedFilteredVehicles = vehicles.subList(0,5);
+        List<Vehicle> actualVehicles = vehiclePage.getContent();
+        for (int i = 0; i < vehiclePage.getSize(); i++) {
+            assertEquals(expectedFilteredVehicles.get(i).getId(), actualVehicles.get(i).getId());
+            assertEquals(expectedFilteredVehicles.get(i).getModel(), actualVehicles.get(i).getModel());
+            assertEquals(expectedFilteredVehicles.get(i).getMarca().getId(), actualVehicles.get(i).getMarca().getId());
+            assertEquals(expectedFilteredVehicles.get(i).getYear(), actualVehicles.get(i).getYear());
+            assertEquals(expectedFilteredVehicles.get(i).getPrice(), actualVehicles.get(i).getPrice());
+        }
+    }
+
+    @Test
+    void shouldReturnVehiclesFilteredByPriceMaxAndPriceMin(){
+        VehicleRepositoryJpa vehicleRepositoryJpa = setup();
+        MarcaJpa marcaJpa1 = createMarca(new MarcaJpa(null,"Audi"));
+        List<Vehicle> vehicles = Arrays.asList(
+                createVehicle(new VehicleJpa(null, "Audi A", 2010, 10000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi B", 2011, 20000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Audi C", 2012, 30000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford D", 2020, 40000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford E", 2020, 50000.0, marcaJpa1)),
+                createVehicle(new VehicleJpa(null, "Ford F", 2020, 60000.0, marcaJpa1))
+        );
+        SearchVehicleForm searchVehicleForm = new SearchVehicleForm(null,null,null, 30000.0, 50000.0);
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(Pageable.unpaged(),searchVehicleForm);
+        assertEquals(3, vehiclePage.getTotalElements());
+        assertEquals(1, vehiclePage.getTotalPages());
+        assertEquals(3, vehiclePage.getContent().size());
+        List<Vehicle> expectedFilteredVehicles = vehicles.subList(2,5);
+        List<Vehicle> actualVehicles = vehiclePage.getContent();
+        for (int i = 0; i < vehiclePage.getSize(); i++) {
+            assertEquals(expectedFilteredVehicles.get(i).getId(), actualVehicles.get(i).getId());
+            assertEquals(expectedFilteredVehicles.get(i).getModel(), actualVehicles.get(i).getModel());
+            assertEquals(expectedFilteredVehicles.get(i).getMarca().getId(), actualVehicles.get(i).getMarca().getId());
+            assertEquals(expectedFilteredVehicles.get(i).getYear(), actualVehicles.get(i).getYear());
+            assertEquals(expectedFilteredVehicles.get(i).getPrice(), actualVehicles.get(i).getPrice());
         }
     }
 
@@ -157,7 +328,7 @@ class VehicleRepositoryJpaTest {
                 createVehicle(new VehicleJpa(null, "Audi F", 2016, 60000.0, marcaJpa))
         );
 
-        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(new PageableDummy(0,3,null));
+        Page<Vehicle> vehiclePage =  vehicleRepositoryJpa.getAll(new PageableDummy(0,3,null),null);
         assertEquals(6, vehiclePage.getTotalElements());
         assertEquals(2, vehiclePage.getTotalPages());
         assertEquals(3, vehiclePage.toList().size());

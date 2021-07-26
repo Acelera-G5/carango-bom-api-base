@@ -2,6 +2,7 @@ package br.com.caelum.carangobom.domain.repository;
 
 import br.com.caelum.carangobom.domain.entity.Vehicle;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
+import br.com.caelum.carangobom.domain.entity.form.SearchVehicleForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,51 @@ import java.util.stream.Collectors;
 public class VehicleRepositoryMock implements VehicleRepository {
 
     private List<Vehicle> vehicleList = new ArrayList<Vehicle>();
+
+    private List<Vehicle> filterVehiclesByMarcaId(List<Vehicle> vehicles, Long marcaId){
+        return vehicles.stream().filter(vehicle -> vehicle.getMarca().getId().equals(marcaId)).collect(Collectors.toList());
+    }
+    private List<Vehicle> filterVehiclesByYear(List<Vehicle> filteredVehicles, Integer year) {
+        return filteredVehicles.stream().filter(vehicle -> vehicle.getYear().equals(year)).collect(Collectors.toList());
+    }
+
+    private List<Vehicle> filterVehiclesByModel(List<Vehicle> filteredVehicles, String modelLike){
+        return filteredVehicles.stream().filter(vehicle -> vehicle.getModel().contains(modelLike)).collect(Collectors.toList());
+    }
+
+    private List<Vehicle> filterVehiclesByPrice(List<Vehicle> filteredVehicles, Double priceMin, Double priceMax) {
+        return filteredVehicles.stream().filter(vehicle -> {
+            if(priceMax != null && priceMin != null){
+                return vehicle.getPrice() >= priceMin && vehicle.getPrice() <= priceMax;
+            }
+            if(priceMin!=null){
+                return vehicle.getPrice() >= priceMin;
+            }
+            if(priceMax!=null){
+                return vehicle.getPrice() <= priceMax;
+            }
+            return false;
+        }).collect(Collectors.toList());
+    }
+
+    private List<Vehicle> filterVehicles(List<Vehicle> vehicles, SearchVehicleForm searchVehicleForm){
+        List<Vehicle> filteredVehicles = vehicles;
+        if(searchVehicleForm.getMarcaId() != null){
+            filteredVehicles = this.filterVehiclesByMarcaId(filteredVehicles, searchVehicleForm.getMarcaId());
+        }
+        if(searchVehicleForm.getYear() != null){
+            filteredVehicles = this.filterVehiclesByYear(filteredVehicles, searchVehicleForm.getYear());
+        }
+        if(searchVehicleForm.getModel() != null){
+            filteredVehicles = this.filterVehiclesByModel(filteredVehicles, searchVehicleForm.getModel());
+        }
+        if(searchVehicleForm.getPriceMin() != null || searchVehicleForm.getPriceMax()!=null){
+            filteredVehicles = this.filterVehiclesByPrice(filteredVehicles, searchVehicleForm.getPriceMin(), searchVehicleForm.getPriceMax());
+        }
+        return filteredVehicles;
+    }
+
+
 
     @Override
     public Vehicle save(Vehicle vehicle) {
@@ -31,23 +77,25 @@ public class VehicleRepositoryMock implements VehicleRepository {
     }
 
     @Override
-    public Page<Vehicle> getAll(Pageable pageable) {
+    public Page<Vehicle> getAll(Pageable pageable, SearchVehicleForm searchVehicleForm) {
+        List<Vehicle> vehicles = new ArrayList<>(this.vehicleList);
+        if(searchVehicleForm != null){
+            vehicles = this.filterVehicles(vehicles, searchVehicleForm);
+        }
+        int vehiclesCount = vehicles.size();
         if(pageable.isPaged()){
-            return new PageImpl(
-                    this.vehicleList.subList(
-                            (int)pageable.getOffset(),
-                            (int)(pageable.getOffset()+pageable.getPageSize())
-                    ),
-                    pageable,
-                    this.vehicleList.size()
-            );
-        }else{
-            return new PageImpl(
-                    this.vehicleList,
-                    pageable,
-                    this.vehicleList.size()
+            vehicles = this.vehicleList.subList(
+                    (int)pageable.getOffset(),
+                    (int)(pageable.getOffset()+pageable.getPageSize())
             );
         }
+
+        return new PageImpl(
+                vehicles,
+                pageable,
+                vehiclesCount
+        );
+
     }
 
     @Override

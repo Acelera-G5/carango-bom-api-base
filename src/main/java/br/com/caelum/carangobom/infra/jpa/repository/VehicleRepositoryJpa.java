@@ -2,6 +2,7 @@ package br.com.caelum.carangobom.infra.jpa.repository;
 
 import br.com.caelum.carangobom.domain.entity.Vehicle;
 import br.com.caelum.carangobom.domain.entity.exception.NotFoundException;
+import br.com.caelum.carangobom.domain.entity.form.SearchVehicleForm;
 import br.com.caelum.carangobom.domain.repository.VehicleRepository;
 import br.com.caelum.carangobom.infra.jpa.entity.VehicleJpa;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,15 +36,74 @@ public class VehicleRepositoryJpa implements VehicleRepository {
         return new VehicleJpa(vehicle);
     }
 
-    private List<Vehicle> getAllVehicles(){
-        return entityManager.createQuery("Select v from vehicle v").getResultList();
+    private Long countVehicles(SearchVehicleForm searchVehicleForm){
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaQueryLong = criteriaBuilder.createQuery(Long.class);
+        Root<VehicleJpa> vehicleJpaRoot = criteriaQueryLong.from(VehicleJpa.class);
+        this.createFilterQuery(criteriaQueryLong, vehicleJpaRoot, searchVehicleForm);
+        criteriaQueryLong.select(criteriaBuilder.count(vehicleJpaRoot));
+        Query query = this.entityManager.createQuery(criteriaQueryLong);
+        return (Long) query.getSingleResult();
     }
 
-    private List<Vehicle> getVehiclePage(Pageable pageable){
-        Query query = entityManager.createQuery("From vehicle",VehicleJpa.class);
+    private List<Vehicle> getAllVehicles(Query query){
+        return query.getResultList();
+    }
+
+    private List<Vehicle> getVehiclePage(Query query, Pageable pageable){
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
         return query.getResultList();
+    }
+
+    private void filterByMarcaId(Root<VehicleJpa> root, CriteriaQuery<?> criteriaQuery, Long marcaId){
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+        criteriaQuery.where(criteriaBuilder.equal(root.join("marca").get("id"), marcaId));
+    }
+
+    private void filterByYear(Root<VehicleJpa> root, CriteriaQuery<?> criteriaQuery, Integer year) {
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+        criteriaQuery.where(criteriaBuilder.equal(root.get("year"), year));
+    }
+
+    private void filterByModel(Root<VehicleJpa> root, CriteriaQuery<?> criteriaQuery, String model) {
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+        criteriaQuery.where(criteriaBuilder.like(root.get("model"),"%"+model+"%"));
+    }
+
+    private void filterByPrice(Root<VehicleJpa> root, CriteriaQuery<?> criteriaQuery, Double priceMin, Double priceMax) {
+        CriteriaBuilder criteriaBuilder = this.entityManager.getCriteriaBuilder();
+        final String column = "price";
+        if(priceMax!=null && priceMin !=null){
+            criteriaQuery.where(criteriaBuilder.between(root.get(column),priceMin,priceMax));
+        }else{
+            if(priceMin!=null){
+                criteriaQuery.where(criteriaBuilder.greaterThanOrEqualTo(root.get(column),priceMin));
+            }
+            if(priceMax!=null){
+                criteriaQuery.where(criteriaBuilder.lessThanOrEqualTo(root.get(column),priceMax));
+            }
+        }
+    }
+
+    private void createFilterQuery(CriteriaQuery<?> criteriaQuery, Root<VehicleJpa> root, SearchVehicleForm searchVehicleForm){
+        if(searchVehicleForm == null){
+            return;
+        }
+        if(searchVehicleForm.getMarcaId() != null){
+            this.filterByMarcaId(root, criteriaQuery, searchVehicleForm.getMarcaId());
+        }
+        if(searchVehicleForm.getYear() != null){
+            this.filterByYear(root, criteriaQuery, searchVehicleForm.getYear());
+        }
+
+        if(searchVehicleForm.getModel() != null){
+            this.filterByModel(root, criteriaQuery, searchVehicleForm.getModel());
+        }
+
+        if (searchVehicleForm.getPriceMin() != null || searchVehicleForm.getPriceMax() != null) {
+            this.filterByPrice(root, criteriaQuery, searchVehicleForm.getPriceMin(), searchVehicleForm.getPriceMax());
+        }
     }
 
     @Override
@@ -61,19 +124,25 @@ public class VehicleRepositoryJpa implements VehicleRepository {
     }
 
     @Override
-    public Page<Vehicle> getAll(Pageable pageable) {
+    public Page<Vehicle> getAll(Pageable pageable, SearchVehicleForm searchVehicleForm) {
+        CriteriaQuery<VehicleJpa> vehicleJpaCriteriaQuery = this.entityManager.getCriteriaBuilder().createQuery(VehicleJpa.class);
+        Root<VehicleJpa> vehicleJpaRoot = vehicleJpaCriteriaQuery.from(VehicleJpa.class);
+        this.createFilterQuery(vehicleJpaCriteriaQuery, vehicleJpaRoot, searchVehicleForm);
+
+        Query query = this.entityManager.createQuery(vehicleJpaCriteriaQuery);
+
         List<Vehicle> vehicleList;
         if(pageable.isPaged()){
-            vehicleList = this.getVehiclePage(pageable);
+            vehicleList = this.getVehiclePage(query, pageable);
         }else{
-            vehicleList = this.getAllVehicles();
+            vehicleList = this.getAllVehicles(query);
         }
-        Long countResult = entityManager.createQuery("Select count(v.id) From vehicle v", Long.class).getSingleResult();
 
+        Long countVehicles = this.countVehicles(searchVehicleForm);
         return new PageImpl<>(
                 vehicleList,
                 pageable,
-                countResult
+                countVehicles
         );
     }
 
