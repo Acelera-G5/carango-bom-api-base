@@ -47,7 +47,7 @@ class SecurityTest {
         request.setPassword("123456");
 
         mockMvc.perform(
-                post("/users").contentType(MediaType.APPLICATION_JSON)
+                post("/vehicle").contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(request))
         ).andExpect(status().isForbidden());
 
